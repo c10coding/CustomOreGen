@@ -44,12 +44,12 @@ public final class CustomOreGenPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for(CustomOreManager manager : customOreManagers.values()){
-            manager.getConfig().saveCustomOreLocation(manager.getCustomOreLocations());
-        }
+        saveCustomOreLocations();
     }
 
-    private void loadCustomOreManagers(){
+    public void loadCustomOreManagers(){
+
+        customOreManagers.clear();
 
         getLogger().info("Loading custom ore managers!");
         File folder = new File(getDataFolder(), CUSTOM_ORE_FOLDER_NAME);
@@ -77,6 +77,12 @@ public final class CustomOreGenPlugin extends JavaPlugin {
 
     public void createNewCustomOre(String customOreName, CustomOreManager customOreManager){
         customOreManagers.put(customOreName, customOreManager);
+    }
+
+    public void saveCustomOreLocations(){
+        for(CustomOreManager manager : customOreManagers.values()){
+            manager.getConfig().saveCustomOreLocation(manager.getCustomOreLocations());
+        }
     }
 
 }

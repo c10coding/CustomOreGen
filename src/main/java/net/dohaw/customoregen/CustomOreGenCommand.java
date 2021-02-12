@@ -68,34 +68,45 @@ public class CustomOreGenCommand implements CommandExecutor {
                 for (String s : customOresNames) {
                     rFactory.sendMessage("&e&l- " + s);
                 }
-            }else if(args[0].equalsIgnoreCase("delete") && args.length >= 2){
+            }else if(args[0].equalsIgnoreCase("delete") && args.length >= 2) {
                 String customOreArg = args[1];
-                if(plugin.isCustomOre(customOreArg)){
-                    if(args.length == 3){
+                if (plugin.isCustomOre(customOreArg)) {
+                    if (args.length == 3) {
                         String decision = args[2];
-                        if(decision.equalsIgnoreCase("c") || decision.equalsIgnoreCase("cancel")){
-                            if(oresInDeletionProcess.containsKey(customOreArg)){
+                        if (decision.equalsIgnoreCase("c") || decision.equalsIgnoreCase("cancel")) {
+                            if (oresInDeletionProcess.containsKey(customOreArg)) {
                                 BukkitTask deletionTask = oresInDeletionProcess.get(customOreArg);
                                 deletionTask.cancel();
                                 rFactory.sendMessage("You have halted the deletion process for this ore!");
                                 rFactory.sendMessage("To start generating this ore again, run this command: &6/cog gen " + customOreArg + " true");
-                            }else{
+                            } else {
                                 rFactory.sendMessage("This ore isn't being deleted at the moment!");
                             }
-                        }else{
+                        } else {
                             rFactory.sendMessage("Maybe you meant to type \"c\" or \"cancel\"?");
                         }
-                    }else{
+                    } else {
                         startOreDeletionProcess(customOreArg);
                         rFactory.sendMessage("Starting the removal of these ores! The config file will be deleted once all the ores have been removed from the world!");
                         rFactory.sendMessage("If you restart the server, you'll have to run this command again to continue the deletion process...");
                     }
-                }else{
+                } else {
                     rFactory.sendMessage("This is not a valid custom ore!");
+                }
+            }else if(args[0].equalsIgnoreCase("reload")){
+                /*
+                    I have to do this because if i try saving the locations before using plugin.loadCustomOreManagers, it'll overwrite anything I am manually changing in the config file because it has different contents in memory that it's saving.
+                 */
+                final Map<String, CustomOreManager> MANAGERS = new HashMap<>(plugin.getCustomOreManagers());
+                plugin.loadCustomOreManagers();
+                for(CustomOreManager manager : plugin.getCustomOreManagers().values()){
+                    CustomOreManager correspondingManager = MANAGERS.get(manager.getCustomOreName());
+                    manager.setCustomOreLocations(correspondingManager.getCustomOreLocations());
                 }
             }else if(args[0].equalsIgnoreCase("help")){
                 rFactory.sendMessage("Commands for this plugin: ");
                 rFactory.sendMessage("&6/cog create <ore name>&f - Creates a new custom ore.");
+                rFactory.sendMessage("&6/cog reload&f - Reloads the plugin");
                 rFactory.sendMessage("&6/cog gen <ore name> <true | false>&f - Either starts or stops the generation of ores.");
                 rFactory.sendMessage("&6/cog delete <ore name> <optional{\"cancel\" or \"c\"}>&f - Slowly starts removing the ore from the world.");
             }
