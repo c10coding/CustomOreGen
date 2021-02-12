@@ -28,7 +28,6 @@ public class CustomOreGenerator extends BukkitRunnable {
 
     @Override
     public void run() {
-        System.out.println("me go run run");
         for(World world : Bukkit.getWorlds()){
             OreWorldData oreWorldData = chunkManager.getOreWorldData().get(world.getName());
             if(oreWorldData != null){
