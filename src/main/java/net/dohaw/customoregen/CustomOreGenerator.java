@@ -62,6 +62,8 @@ public class CustomOreGenerator extends BukkitRunnable {
 
             boolean willSpawnInChunk = (boolean) pu.getRandomElement();
 
+            System.out.println("WILL SPAWN: " + willSpawnInChunk);
+            System.out.println("CHANCE: " + numChunkSpawnChance);
             if(!willSpawnInChunk) continue;
             if(numChunksMarked == maxChunksToCheck) return;
 

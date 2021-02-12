@@ -33,6 +33,8 @@ public class CustomOreGenCommand implements CommandExecutor {
                     boolean hasBeenCreated = createNewCustomOre(customOreName);
                     if(!hasBeenCreated){
                        rFactory.sendMessage("&cThere has been an error trying to create this ore. Please contact an administrator...");
+                    }else{
+                        rFactory.sendMessage("You have created a new ore!");
                     }
                 }else{
                     rFactory.sendMessage("This is already a custom ore name!");
