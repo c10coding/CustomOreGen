@@ -1,0 +1,11 @@
+Is Generating Ore: false
+Display Name: Example Ore
+Lore:
+  - Example ore lore
+  - Another example ore line
+Worlds:
+  world:
+    Minimum Y Level: 0
+    Maximum Y Level: 50
+    Spawn Chance: 0.5
+    Is Generating Ore: true
