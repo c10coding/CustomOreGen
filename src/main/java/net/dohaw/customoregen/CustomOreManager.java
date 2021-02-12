@@ -31,7 +31,7 @@ public class CustomOreManager {
     private CustomOreGenerator generator;
 
     @Getter @Setter
-    private int numBlocksChangingPerItr;
+    private double chanceOreIsInChunk;
 
     @Getter
     private JavaPlugin plugin;

@@ -1,8 +1,8 @@
 # If this is set to false, no ores will generate in any worlds
 Is Generating Ore: false
-# How many blocks it's changing per run-through (A run-through happens every 30 seconds to 1 minute)
-Number of Blocks Changed Per Iteration: 100
 Display Name: Example Ore
+# Chance that this ore will be in a chunk
+Chunk Spawn Chance: 0.2
 Lore:
   - Example ore lore
   - Another example ore line

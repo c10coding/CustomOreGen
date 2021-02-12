@@ -27,9 +27,8 @@ public class CustomOreConfig extends Config {
     public CustomOreManager loadChunkManager(){
 
         boolean isGeneratingOre = config.getBoolean("Is Generating Ore");
-        int numBlocksChangingPerItr = config.getInt("Number of Blocks Changed Per Iteration", 100);
         CustomOreManager manager = new CustomOreManager(plugin, customOreName, this);
-        manager.setNumBlocksChangingPerItr(numBlocksChangingPerItr);
+        manager.setChanceOreIsInChunk(config.getDouble("Chunk Spawn Chance"));
         loadWorldData(manager);
 
         if(isGeneratingOre){

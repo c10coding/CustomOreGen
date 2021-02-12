@@ -9,14 +9,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class CustomOreGenerator extends BukkitRunnable {
 
-    private Queue<Location> blocksNeedChanging = new LinkedBlockingQueue<>();
-    
     private JavaPlugin plugin;
     private CustomOreManager chunkManager;
 
@@ -59,55 +54,59 @@ public class CustomOreGenerator extends BukkitRunnable {
 
         for(Chunk chunk : world.getLoadedChunks()){
 
+            double chunkSpawnChance = chunkManager.getChanceOreIsInChunk();
+            int numChunkSpawnChance = (int) (chunkSpawnChance * 100);
+            ProbabilityUtilities pu = new ProbabilityUtilities();
+            pu.addChance(true, numChunkSpawnChance);
+            pu.addChance(false, 100 - numChunkSpawnChance);
+
+            boolean willSpawnInChunk = (boolean) pu.getRandomElement();
+
+            if(!willSpawnInChunk) continue;
             if(numChunksMarked == maxChunksToCheck) return;
 
             if(!chunkManager.isChunkMarked(chunk)) {
 
                 numChunksMarked++;
                 ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
-                CompletableFuture.supplyAsync(() -> {
 
-                    List<Location> locationsNeedChanging = new ArrayList<>();
+                List<Location> locationsNeedChanging = new ArrayList<>();
 
-                    int chunkSnapshotX = chunkSnapshot.getX();
-                    int chunkSnapshotZ = chunkSnapshot.getZ();
-                    int chunkX = chunkSnapshotX * 16;
-                    int chunkZ = chunkSnapshotZ * 16;
+                int chunkSnapshotX = chunkSnapshot.getX();
+                int chunkSnapshotZ = chunkSnapshot.getZ();
+                int chunkX = chunkSnapshotX * 16;
+                int chunkZ = chunkSnapshotZ * 16;
 
-                    for (int xx = 0; xx < 16; xx++) {
-                        for (int zz = 0; zz < 16; zz++) {
-                            for (int yy = minY; yy < maxY; yy++) {
-                                Material blockSnapshotMat = chunkSnapshot.getBlockType(xx, yy, zz);
-                                if (blockSnapshotMat == Material.STONE) {
+                for (int xx = 0; xx < 16; xx++) {
+                    for (int zz = 0; zz < 16; zz++) {
+                        for (int yy = minY; yy < maxY; yy++) {
+                            Material blockSnapshotMat = chunkSnapshot.getBlockType(xx, yy, zz);
+                            if (blockSnapshotMat == Material.STONE) {
 
-                                    ProbabilityUtilities pu = new ProbabilityUtilities();
-                                    int numSpawnChance = (int) (genChance * 100);
-                                    if (numSpawnChance > 100) {
-                                        numSpawnChance = 50;
-                                        plugin.getLogger().warning("There was an error pertaining the spawn chance of " + chunkManager.getCustomOreName() + ". It is greater than 100!");
-                                    }
-                                    pu.addChance(true, numSpawnChance);
-                                    pu.addChance(false, 100 - numSpawnChance);
-
-                                    boolean willGen = (boolean) pu.getRandomElement();
-                                    if (willGen) {
-                                        int blockX = chunkX + xx;
-                                        int blockZ = chunkZ + zz;
-                                        Location loc = new Location(world, blockX, yy, blockZ);
-                                        locationsNeedChanging.add(loc);
-                                    }
-
+                                ProbabilityUtilities pu1 = new ProbabilityUtilities();
+                                int numSpawnChance = (int) (genChance * 100);
+                                if (numSpawnChance > 100) {
+                                    numSpawnChance = 50;
+                                    plugin.getLogger().warning("There was an error pertaining the spawn chance of " + chunkManager.getCustomOreName() + ". It is greater than 100!");
                                 }
+                                pu1.addChance(true, numSpawnChance);
+                                pu1.addChance(false, 100 - numSpawnChance);
+
+                                boolean willGen = (boolean) pu1.getRandomElement();
+                                if (willGen) {
+                                    int blockX = chunkX + xx;
+                                    int blockZ = chunkZ + zz;
+                                    Location loc = new Location(world, blockX, yy, blockZ);
+                                    locationsNeedChanging.add(loc);
+                                }
+
                             }
                         }
                     }
+                }
 
-                    return locationsNeedChanging;
-
-                }).thenAccept(blocksNeedChanging -> {
-                    changeBlocks(blocksNeedChanging);
-                    chunkManager.markChunk(chunk);
-                });
+                changeBlocks(locationsNeedChanging);
+                chunkManager.markChunk(chunk);
 
             }
 
@@ -116,6 +115,7 @@ public class CustomOreGenerator extends BukkitRunnable {
 
     private void changeBlocks(List<Location> blocksToChange){
         for(Location loc : blocksToChange){
+            System.out.println("LOCATION: " + loc.toString());
             Block block = loc.getBlock();
             block.setType(Material.GOLD_BLOCK);
         }
