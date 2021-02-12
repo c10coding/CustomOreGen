@@ -4,9 +4,7 @@ import lombok.Getter;
 import net.dohaw.corelib.ResponderFactory;
 import net.dohaw.customoregen.config.CustomOreConfig;
 import net.dohaw.customoregen.exception.UnexpectedFileExists;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -99,7 +97,7 @@ public class CustomOreGenCommand implements CommandExecutor {
                 rFactory.sendMessage("Commands for this plugin: ");
                 rFactory.sendMessage("&6/cog create <ore name>&f - Creates a new custom ore.");
                 rFactory.sendMessage("&6/cog gen <ore name> <true | false>&f - Either starts or stops the generation of ores.");
-                rFactory.sendMessage("&6/cog delete <ore name> &f - Slowly starts removing the ore from the world.");
+                rFactory.sendMessage("&6/cog delete <ore name> <optional{\"cancel\" or \"c\"}>&f - Slowly starts removing the ore from the world.");
             }
         }
         return false;
@@ -193,6 +191,18 @@ public class CustomOreGenCommand implements CommandExecutor {
                 plugin.getLogger().info("The deletion process for the ore " + customOreArg + " has finished!");
 
             }
+
+            /*
+                Have to remove the marking in case you make another custom ore with the same name.
+             */
+            for(World world : Bukkit.getWorlds()){
+                for(Chunk chunk : world.getLoadedChunks()){
+                    if(customOreManager.isChunkMarked(chunk)){
+                        customOreManager.unmarkChunk(chunk);
+                    }
+                }
+            }
+
         }, 0, 100);
         oresInDeletionProcess.put(customOreArg, deletionProcess);
 

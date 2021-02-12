@@ -4,13 +4,18 @@ import lombok.Getter;
 import net.dohaw.corelib.CoreLib;
 import net.dohaw.corelib.JPUtils;
 import net.dohaw.customoregen.config.CustomOreConfig;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+    Made by c10coding on Github.
+    Email: caleb.ja.owens@gmail.com
+    Finished on 2/12/2021
+    Hello future person :)
+ */
 public final class CustomOreGenPlugin extends JavaPlugin {
 
     public static final String CUSTOM_ORE_FOLDER_NAME = "customOres";
@@ -54,7 +59,7 @@ public final class CustomOreGenPlugin extends JavaPlugin {
             for(File file : fileNamesInFolder){
                 String fileName = file.getName();
                 String customOreName = fileName.replace(".yml", "");
-                System.out.println("Loaded Custom Ore " + customOreName);
+                getLogger().info("Loaded Custom Ore " + customOreName);
                 CustomOreConfig config = new CustomOreConfig(customOreName, file);
                 customOreManagers.put(customOreName, config.loadChunkManager());
             }
@@ -63,7 +68,6 @@ public final class CustomOreGenPlugin extends JavaPlugin {
         }
 
         getLogger().info("Custom ore managers have been loaded!");
-
 
     }
 

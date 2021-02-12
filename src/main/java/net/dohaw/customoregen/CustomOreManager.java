@@ -84,6 +84,11 @@ public class CustomOreManager {
        return pdc.has(NamespacedKey.minecraft("marked_" + customOreName), PersistentDataType.STRING);
     }
 
+    public void unmarkChunk(Chunk chunk){
+        PersistentDataContainer pdc = chunk.getPersistentDataContainer();
+        pdc.remove(NamespacedKey.minecraft("marked_" + customOreName));
+    }
+
     public void startGenerator(){
         this.generator = new CustomOreGenerator(plugin, this);
         // Do this so that generating doesn't happen at the exact same interval
