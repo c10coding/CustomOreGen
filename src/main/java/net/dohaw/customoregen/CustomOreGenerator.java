@@ -7,7 +7,10 @@ import org.bukkit.block.Block;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class CustomOreGenerator extends BukkitRunnable {
@@ -30,16 +33,13 @@ public class CustomOreGenerator extends BukkitRunnable {
             OreWorldData oreWorldData = chunkManager.getOreWorldData().get(world.getName());
             if(oreWorldData != null){
                 if(oreWorldData.isWillGeneratorOre()){
-                    populateQueue(oreWorldData, world);
-                    changeBlocks();
+                    makeChangesToWorld(oreWorldData, world);
                 }
             }
         }
     }
 
-    private void populateQueue(OreWorldData worldData, World world){
-
-        System.out.println("POPULATING!");
+    private void makeChangesToWorld(OreWorldData worldData, World world){
 
         int minY = worldData.getMinY();
         int maxY = worldData.getMaxY();
@@ -50,62 +50,71 @@ public class CustomOreGenerator extends BukkitRunnable {
             } catch (LargerMinYException e) {
                 e.printStackTrace();
             }
+            this.cancel();
         }
 
         double genChance = worldData.getSpawnChance();
 
-        System.out.println("Loaded chunks size: " + world.getLoadedChunks().length);
         for(Chunk chunk : world.getLoadedChunks()){
 
-            ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                for(int xx = 0; xx < 16; xx++) {
-                    for (int zz = 0; zz < 16; zz++) {
-                        for (int yy = minY; yy < maxY; yy++) {
-                            Material blockSnapshotMat = chunkSnapshot.getBlockType(xx, yy, zz);
-                            if (blockSnapshotMat == Material.STONE) {
+            if(!chunkManager.isChunkMarked(chunk)) {
 
-                                ProbabilityUtilities pu = new ProbabilityUtilities();
-                                int numSpawnChance = (int) (genChance * 100);
-                                if(numSpawnChance > 100){
-                                    numSpawnChance = 50;
-                                    plugin.getLogger().warning("There was an error pertaining the spawn chance of " + chunkManager.getCustomOreName() + ". It is greater than 100!");
+                System.out.println("NOT MARKED");
+                ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
+                CompletableFuture.supplyAsync(() -> {
+
+                    List<Location> locationsNeedChanging = new ArrayList<>();
+
+                    int chunkSnapshotX = chunkSnapshot.getX();
+                    int chunkSnapshotZ = chunkSnapshot.getZ();
+                    int chunkX = chunkSnapshotX * 16;
+                    int chunkZ = chunkSnapshotZ * 16;
+
+                    for (int xx = 0; xx < 16; xx++) {
+                        for (int zz = 0; zz < 16; zz++) {
+                            for (int yy = minY; yy < maxY; yy++) {
+                                Material blockSnapshotMat = chunkSnapshot.getBlockType(xx, yy, zz);
+                                if (blockSnapshotMat == Material.STONE) {
+
+                                    ProbabilityUtilities pu = new ProbabilityUtilities();
+                                    int numSpawnChance = (int) (genChance * 100);
+                                    if (numSpawnChance > 100) {
+                                        numSpawnChance = 50;
+                                        plugin.getLogger().warning("There was an error pertaining the spawn chance of " + chunkManager.getCustomOreName() + ". It is greater than 100!");
+                                    }
+                                    pu.addChance(true, numSpawnChance);
+                                    pu.addChance(false, 100 - numSpawnChance);
+
+                                    boolean willGen = (boolean) pu.getRandomElement();
+                                    if (willGen) {
+                                        int blockX = chunkX + xx;
+                                        int blockZ = chunkZ + zz;
+                                        Location loc = new Location(world, blockX, yy, blockZ);
+                                        locationsNeedChanging.add(loc);
+                                    }
+
                                 }
-                                pu.addChance(true, numSpawnChance);
-                                pu.addChance(false, 100 - numSpawnChance);
-
-                                boolean willGen = (boolean) pu.getRandomElement();
-                                if(willGen){
-
-                                    Location loc = new Location(world, xx, yy, zz);
-                                    blocksNeedChanging.add(loc);
-                                    System.out.println("ADDING LOCATION " + loc.toString());
-
-                                }
-
                             }
                         }
                     }
-                }
-            });
+
+                    return locationsNeedChanging;
+
+                }).thenAccept(blocksNeedChanging -> {
+                    changeBlocks(blocksNeedChanging);
+                    chunkManager.markChunk(chunk);
+                });
+
+            }
+
         }
     }
 
-    private void changeBlocks(){
-
-        System.out.println("CHANGING THINGS!");
-        int numBlocksChanging = chunkManager.getNumBlocksChangingPerItr();
-        int blocksChanged = 0;
-        while(blocksChanged != numBlocksChanging){
-            Location loc = blocksNeedChanging.poll();
-            assert loc != null;
+    private void changeBlocks(List<Location> blocksToChange){
+        for(Location loc : blocksToChange){
             Block block = loc.getBlock();
-            if(block.getType() == Material.STONE){
-                block.setType(Material.GOLD_BLOCK);
-                blocksChanged++;
-            }
+            block.setType(Material.GOLD_BLOCK);
         }
-
     }
 
 }

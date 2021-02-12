@@ -46,7 +46,7 @@ public class CustomOreManager {
         this.generator = new CustomOreGenerator(plugin, this);
         // Do this so that generating doesn't happen at the exact same interval
         int interval = MathHelper.getRandomInteger(1200, 600);
-        generator.runTaskTimer(plugin, 2L, 20);
+        generator.runTaskTimer(plugin, 2L, interval);
     }
 
     public void startOrHaltGeneration(boolean decision){
