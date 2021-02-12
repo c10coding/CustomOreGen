@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.dohaw.corelib.CoreLib;
 import net.dohaw.corelib.JPUtils;
 import net.dohaw.customoregen.config.CustomOreConfig;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -13,6 +14,8 @@ import java.util.Map;
 public final class CustomOreGenPlugin extends JavaPlugin {
 
     public static final String CUSTOM_ORE_FOLDER_NAME = "customOres";
+
+    private CustomOreGenCommand mainCommand;
 
     @Getter
     private Map<String, CustomOreManager> customOreManagers = new HashMap<>();
@@ -28,13 +31,18 @@ public final class CustomOreGenPlugin extends JavaPlugin {
         );
         loadCustomOreManagers();
 
-        JPUtils.registerCommand("customoregen", new CustomOreGenCommand(this));
+        this.mainCommand = new CustomOreGenCommand(this);
+        JPUtils.registerCommand("customoregen", mainCommand);
         JPUtils.registerEvents(new BlockWatcher(this));
 
     }
 
     @Override
-    public void onDisable() { }
+    public void onDisable() {
+        for(CustomOreManager manager : customOreManagers.values()){
+            manager.getConfig().saveCustomOreLocation(manager.getCustomOreLocations());
+        }
+    }
 
     private void loadCustomOreManagers(){
 
@@ -46,7 +54,7 @@ public final class CustomOreGenPlugin extends JavaPlugin {
             for(File file : fileNamesInFolder){
                 String fileName = file.getName();
                 String customOreName = fileName.replace(".yml", "");
-                System.out.println("Custom Ore Name: " + customOreName);
+                System.out.println("Loaded Custom Ore " + customOreName);
                 CustomOreConfig config = new CustomOreConfig(customOreName, file);
                 customOreManagers.put(customOreName, config.loadChunkManager());
             }

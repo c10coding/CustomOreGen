@@ -1,5 +1,6 @@
 package net.dohaw.customoregen;
 
+import lombok.Getter;
 import net.dohaw.corelib.ResponderFactory;
 import net.dohaw.customoregen.config.CustomOreConfig;
 import net.dohaw.customoregen.exception.UnexpectedFileExists;
@@ -19,7 +20,9 @@ import java.util.*;
 
 public class CustomOreGenCommand implements CommandExecutor {
 
+    @Getter
     private Map<String, BukkitTask> oresInDeletionProcess = new HashMap<>();
+
     private CustomOreGenPlugin plugin;
 
     public CustomOreGenCommand(CustomOreGenPlugin plugin){
@@ -171,7 +174,7 @@ public class CustomOreGenCommand implements CommandExecutor {
         List<Location> customOreLocations = customOreManager.getCustomOreLocations();
 
         BukkitTask deletionProcess = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            int maxNumBlockEdits = 50;
+            int maxNumBlockEdits = 200;
             int numBlocksEdited = 0;
             if (!customOreLocations.isEmpty()) {
                 Iterator<Location> itr = customOreLocations.iterator();
