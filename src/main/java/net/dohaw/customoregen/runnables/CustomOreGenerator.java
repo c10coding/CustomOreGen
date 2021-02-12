@@ -1,6 +1,8 @@
-package net.dohaw.customoregen;
+package net.dohaw.customoregen.runnables;
 
 import net.dohaw.corelib.ProbabilityUtilities;
+import net.dohaw.customoregen.CustomOreManager;
+import net.dohaw.customoregen.OreWorldData;
 import net.dohaw.customoregen.exception.LargerMinYException;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -18,7 +20,6 @@ public class CustomOreGenerator extends BukkitRunnable {
     public CustomOreGenerator(JavaPlugin plugin, CustomOreManager chunkManager){
         this.plugin = plugin;
         this.chunkManager = chunkManager;
-        System.out.println("World data: " + chunkManager.getOreWorldData());
     }
 
     @Override
@@ -62,8 +63,6 @@ public class CustomOreGenerator extends BukkitRunnable {
 
             boolean willSpawnInChunk = (boolean) pu.getRandomElement();
 
-            System.out.println("WILL SPAWN: " + willSpawnInChunk);
-            System.out.println("CHANCE: " + numChunkSpawnChance);
             if(!willSpawnInChunk) continue;
             if(numChunksMarked == maxChunksToCheck) return;
 
@@ -117,9 +116,9 @@ public class CustomOreGenerator extends BukkitRunnable {
 
     private void changeBlocks(List<Location> blocksToChange){
         for(Location loc : blocksToChange){
-            System.out.println("LOCATION: " + loc.toString());
             Block block = loc.getBlock();
-            block.setType(Material.GOLD_BLOCK);
+            chunkManager.getCustomOreLocations().add(loc);
+            block.setType(chunkManager.getOreMaterial());
         }
     }
 

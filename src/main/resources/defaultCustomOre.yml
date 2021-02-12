@@ -3,10 +3,17 @@ Is Generating Ore: false
 # Chance that this ore will be in a chunk
 Chunk Spawn Chance: 0.1
 
-Display Name: Example Ore
-Lore:
-  - Example ore lore
-  - Another example ore line
+# What is dropped when the player mines the ore
+Dropped Item:
+  Drop Amount:
+  Material: COAL_ORE
+  Display Name: Example Ore
+  Lore:
+    - Example ore lore
+    - Another example ore line
+
+# What is spawned
+Ore Material: COAL_ORE
 
 Worlds:
   world:
@@ -15,3 +22,6 @@ Worlds:
     # The chances of it replacing a stone block
     Spawn Chance: 0.1
     Is Generating Ore: true
+
+
+Ore Locations:

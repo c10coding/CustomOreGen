@@ -3,18 +3,23 @@ package net.dohaw.customoregen;
 import net.dohaw.corelib.ResponderFactory;
 import net.dohaw.customoregen.config.CustomOreConfig;
 import net.dohaw.customoregen.exception.UnexpectedFileExists;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Set;
+import java.util.*;
 
 public class CustomOreGenCommand implements CommandExecutor {
 
+    private Map<String, BukkitTask> oresInDeletionProcess = new HashMap<>();
     private CustomOreGenPlugin plugin;
 
     public CustomOreGenCommand(CustomOreGenPlugin plugin){
@@ -56,12 +61,42 @@ public class CustomOreGenCommand implements CommandExecutor {
                 }else{
                     rFactory.sendMessage("This is not a valid custom ore!");
                 }
-            }else if(args[0].equalsIgnoreCase("list") && args.length == 1){
+            }else if(args[0].equalsIgnoreCase("list") && args.length == 1) {
                 Set<String> customOresNames = plugin.getCustomOreManagers().keySet();
                 rFactory.sendCenteredMessage("&lCustom Ores:");
-                for(String s : customOresNames){
+                for (String s : customOresNames) {
                     rFactory.sendMessage("&e&l- " + s);
                 }
+            }else if(args[0].equalsIgnoreCase("delete") && args.length >= 2){
+                String customOreArg = args[1];
+                if(plugin.isCustomOre(customOreArg)){
+                    if(args.length == 3){
+                        String decision = args[2];
+                        if(decision.equalsIgnoreCase("c") || decision.equalsIgnoreCase("cancel")){
+                            if(oresInDeletionProcess.containsKey(customOreArg)){
+                                BukkitTask deletionTask = oresInDeletionProcess.get(customOreArg);
+                                deletionTask.cancel();
+                                rFactory.sendMessage("You have halted the deletion process for this ore!");
+                                rFactory.sendMessage("To start generating this ore again, run this command: &6/cog gen " + customOreArg + " true");
+                            }else{
+                                rFactory.sendMessage("This ore isn't being deleted at the moment!");
+                            }
+                        }else{
+                            rFactory.sendMessage("Maybe you meant to type \"c\" or \"cancel\"?");
+                        }
+                    }else{
+                        startOreDeletionProcess(customOreArg);
+                        rFactory.sendMessage("Starting the removal of these ores! The config file will be deleted once all the ores have been removed from the world!");
+                        rFactory.sendMessage("If you restart the server, you'll have to run this command again to continue the deletion process...");
+                    }
+                }else{
+                    rFactory.sendMessage("This is not a valid custom ore!");
+                }
+            }else if(args[0].equalsIgnoreCase("help")){
+                rFactory.sendMessage("Commands for this plugin: ");
+                rFactory.sendMessage("&6/cog create <ore name>&f - Creates a new custom ore.");
+                rFactory.sendMessage("&6/cog gen <ore name> <true | false>&f - Either starts or stops the generation of ores.");
+                rFactory.sendMessage("&6/cog delete <ore name> &f - Slowly starts removing the ore from the world.");
             }
         }
         return false;
@@ -123,6 +158,40 @@ public class CustomOreGenCommand implements CommandExecutor {
                 outputStream.write(bytes, 0, read);
             }
         }
+
+    }
+
+    private void startOreDeletionProcess(String customOreArg){
+
+        CustomOreManager customOreManager = plugin.getCustomOreManagers().get(customOreArg);
+        customOreManager.startOrHaltGeneration(false);
+
+        // We want to keep saving the locations even if the contents are being removed because if the server restarts while the deletion process is going, it can pick up where it left off if the deletion process is started back up
+        customOreManager.startCustomOreLocationSaver();
+        List<Location> customOreLocations = customOreManager.getCustomOreLocations();
+
+        BukkitTask deletionProcess = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int maxNumBlockEdits = 50;
+            int numBlocksEdited = 0;
+            if (!customOreLocations.isEmpty()) {
+                Iterator<Location> itr = customOreLocations.iterator();
+                while (itr.hasNext()) {
+                    if (numBlocksEdited == maxNumBlockEdits) return;
+                    itr.next().getBlock().setType(Material.STONE);
+                    numBlocksEdited++;
+                    itr.remove();
+                }
+            }else{
+
+                BukkitTask task = oresInDeletionProcess.get(customOreArg);
+                task.cancel();
+                customOreManager.getConfig().deleteFile();
+                plugin.getCustomOreManagers().remove(customOreArg);
+                plugin.getLogger().info("The deletion process for the ore " + customOreArg + " has finished!");
+
+            }
+        }, 0, 100);
+        oresInDeletionProcess.put(customOreArg, deletionProcess);
 
     }
 

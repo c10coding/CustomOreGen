@@ -29,13 +29,12 @@ public final class CustomOreGenPlugin extends JavaPlugin {
         loadCustomOreManagers();
 
         JPUtils.registerCommand("customoregen", new CustomOreGenCommand(this));
+        JPUtils.registerEvents(new BlockWatcher(this));
 
     }
 
     @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-    }
+    public void onDisable() { }
 
     private void loadCustomOreManagers(){
 
