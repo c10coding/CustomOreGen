@@ -1,5 +1,6 @@
 package net.dohaw.customoregen;
 
+import lombok.Getter;
 import net.dohaw.corelib.CoreLib;
 import net.dohaw.corelib.JPUtils;
 import net.dohaw.customoregen.config.CustomOreConfig;
@@ -12,6 +13,8 @@ import java.util.Map;
 public final class CustomOreGenPlugin extends JavaPlugin {
 
     public static final String CUSTOM_ORE_FOLDER_NAME = "customOres";
+
+    @Getter
     private Map<String, CustomOreManager> customOreManagers = new HashMap<>();
 
     @Override

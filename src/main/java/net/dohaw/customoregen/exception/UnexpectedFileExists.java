@@ -1,4 +1,4 @@
-package net.dohaw.customoregen;
+package net.dohaw.customoregen.exception;
 
 public class UnexpectedFileExists extends Exception{
 

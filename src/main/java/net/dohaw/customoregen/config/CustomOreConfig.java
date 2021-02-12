@@ -25,32 +25,45 @@ public class CustomOreConfig extends Config {
     }
 
     public CustomOreManager loadChunkManager(){
-        CustomOreManager chunkManager = new CustomOreManager(customOreName, this);
-        chunkManager.setOreWorldData(loadWorldData());
-        return chunkManager;
+
+        boolean isGeneratingOre = config.getBoolean("Is Generating Ore");
+        int numBlocksChangingPerItr = config.getInt("Number of Blocks Changed Per Iteration", 100);
+        CustomOreManager manager = new CustomOreManager(plugin, customOreName, this);
+        manager.setNumBlocksChangingPerItr(numBlocksChangingPerItr);
+        loadWorldData(manager);
+
+        if(isGeneratingOre){
+            manager.startGenerator();
+        }
+
+        return manager;
     }
 
-    private Map<String, OreWorldData> loadWorldData(){
+    public void loadWorldData(CustomOreManager manager){
 
         Map<String, OreWorldData> worldData = new HashMap<>();
 
         ConfigurationSection worldsSection = config.getConfigurationSection("Worlds");
         if(worldsSection != null){
             for(String worldName : worldsSection.getKeys(false)){
-                boolean isGeneratingOreInWorld = worldsSection.getBoolean("Is Generating Ore", false);
-                if(isGeneratingOreInWorld){
-                    int minYLevel = worldsSection.getInt(worldName + ".Minimum Y Level");
-                    int maxYLevel = worldsSection.getInt(worldName + ".Maximum Y Level");
-                    double spawnChance = worldsSection.getDouble(worldName + ".Spawn Chance");
-                    OreWorldData oreWorldData = new OreWorldData(minYLevel, maxYLevel, spawnChance);
-                    worldData.put(worldName, oreWorldData);
-                }
+                int minYLevel = worldsSection.getInt(worldName + ".Minimum Y Level");
+                int maxYLevel = worldsSection.getInt(worldName + ".Maximum Y Level");
+                double spawnChance = worldsSection.getDouble(worldName + ".Spawn Chance");
+                boolean willGenerateOre = worldsSection.getBoolean(worldName + ".Is Generating Ore");
+                OreWorldData oreWorldData = new OreWorldData(minYLevel, maxYLevel, spawnChance, willGenerateOre);
+                worldData.put(worldName, oreWorldData);
             }
         }else{
             plugin.getLogger().warning("The custom ore file " + fileName + " does not have the \"Worlds\" section or it is empty...");
         }
 
-        return worldData;
+        manager.setOreWorldData(worldData);
+
+    }
+
+    public void setIsGeneratingOre(boolean value){
+        config.set("Is Generating Ore", value);
+        saveConfig();
     }
 
 }

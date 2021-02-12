@@ -1,8 +1,8 @@
 package net.dohaw.customoregen;
 
-import net.dohaw.corelib.JPUtils;
 import net.dohaw.corelib.ResponderFactory;
 import net.dohaw.customoregen.config.CustomOreConfig;
+import net.dohaw.customoregen.exception.UnexpectedFileExists;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 public class CustomOreGenCommand implements CommandExecutor {
 
@@ -36,8 +37,29 @@ public class CustomOreGenCommand implements CommandExecutor {
                 }else{
                     rFactory.sendMessage("This is already a custom ore name!");
                 }
-            }else if(args[0].equalsIgnoreCase("gen") && args.length == 2){
+            }else if(args[0].equalsIgnoreCase("gen") && args.length == 3){
 
+                String customOreName = args[1];
+                String boolArg = args[2];
+
+                if(plugin.isCustomOre(customOreName)){
+                    boolean bool = Boolean.parseBoolean(boolArg);
+                    CustomOreManager customOreManager = plugin.getCustomOreManagers().get(customOreName);
+                    customOreManager.startOrHaltGeneration(bool);
+                    if(bool){
+                        rFactory.sendMessage("This ore will now start to be generated throughout the worlds defined in the config!");
+                    }else{
+                        rFactory.sendMessage("This ore has halted generation!");
+                    }
+                }else{
+                    rFactory.sendMessage("This is not a valid custom ore!");
+                }
+            }else if(args[0].equalsIgnoreCase("list") && args.length == 1){
+                Set<String> customOresNames = plugin.getCustomOreManagers().keySet();
+                rFactory.sendCenteredMessage("&lCustom Ores:");
+                for(String s : customOresNames){
+                    rFactory.sendMessage("&e&l- " + s);
+                }
             }
         }
         return false;
