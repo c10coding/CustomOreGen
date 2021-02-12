@@ -1,0 +1,18 @@
+name: CustomOreGen
+version: ${project.version}
+main: net.dohaw.customoregen.CustomOreGenPlugin
+api-version: 1.16
+
+commands:
+  customoregen:
+    aliases:
+      - cog
+      - customog
+      - customoreg
+      - custg
+      - custog
+      - cuog
+
+permissions:
+  customoregen.use:
+    default: op
