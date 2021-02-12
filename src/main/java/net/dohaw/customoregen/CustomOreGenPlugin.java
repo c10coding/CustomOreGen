@@ -38,12 +38,14 @@ public final class CustomOreGenPlugin extends JavaPlugin {
 
         getLogger().info("Loading custom ore managers!");
         File folder = new File(getDataFolder(), CUSTOM_ORE_FOLDER_NAME);
-        String[] fileNamesInFolder = folder.list();
+        File[] fileNamesInFolder = folder.listFiles();
 
         if(fileNamesInFolder != null){
-            for(String fileName : fileNamesInFolder){
+            for(File file : fileNamesInFolder){
+                String fileName = file.getName();
                 String customOreName = fileName.replace(".yml", "");
-                CustomOreConfig config = new CustomOreConfig(this, getDataFolder() + File.separator + fileName);
+                System.out.println("Custom Ore Name: " + customOreName);
+                CustomOreConfig config = new CustomOreConfig(customOreName, file);
                 customOreManagers.put(customOreName, config.loadChunkManager());
             }
         }else{

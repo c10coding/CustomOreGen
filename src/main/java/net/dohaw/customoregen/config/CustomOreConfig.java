@@ -1,16 +1,13 @@
 package net.dohaw.customoregen.config;
 
 import net.dohaw.corelib.Config;
-import net.dohaw.customoregen.ChunkLocation;
 import net.dohaw.customoregen.CustomOreManager;
 import net.dohaw.customoregen.OreWorldData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CustomOreConfig extends Config {
@@ -18,7 +15,7 @@ public class CustomOreConfig extends Config {
     private String customOreName;
 
     public CustomOreConfig(JavaPlugin plugin, String customOreName) {
-        super(plugin, plugin.getDataFolder() + File.separator + customOreName);
+        super(plugin, customOreName);
         this.customOreName = customOreName;
     }
 
