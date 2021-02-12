@@ -54,11 +54,16 @@ public class CustomOreGenerator extends BukkitRunnable {
 
         double genChance = worldData.getSpawnChance();
 
+        int maxChunksToCheck = 10;
+        int numChunksMarked = 0;
+
         for(Chunk chunk : world.getLoadedChunks()){
+
+            if(numChunksMarked == maxChunksToCheck) return;
 
             if(!chunkManager.isChunkMarked(chunk)) {
 
-                System.out.println("NOT MARKED");
+                numChunksMarked++;
                 ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
                 CompletableFuture.supplyAsync(() -> {
 

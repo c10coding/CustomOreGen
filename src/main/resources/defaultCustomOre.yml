@@ -9,7 +9,7 @@ Lore:
 Worlds:
   world:
     Minimum Y Level: 0
-    Maximum Y Level: 50
+    Maximum Y Level: 25
     # The chances of it replacing a stone block
-    Spawn Chance: 0.5
+    Spawn Chance: 0.20
     Is Generating Ore: true
