@@ -82,7 +82,7 @@ public class CustomOreGenerator extends BukkitRunnable {
                     for (int zz = 0; zz < 16; zz++) {
                         for (int yy = minY; yy < maxY; yy++) {
                             Material blockSnapshotMat = chunkSnapshot.getBlockType(xx, yy, zz);
-                            if (blockSnapshotMat == Material.STONE) {
+                            if (blockSnapshotMat == worldData.getMaterialReplaced()) {
 
                                 ProbabilityUtilities pu1 = new ProbabilityUtilities();
                                 int numSpawnChance = (int) (genChance * 100);

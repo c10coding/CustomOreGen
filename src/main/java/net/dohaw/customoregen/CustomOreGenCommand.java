@@ -189,7 +189,10 @@ public class CustomOreGenCommand implements CommandExecutor {
                 Iterator<Location> itr = customOreLocations.iterator();
                 while (itr.hasNext()) {
                     if (numBlocksEdited == maxNumBlockEdits) return;
-                    itr.next().getBlock().setType(Material.STONE);
+                    Location loc = itr.next();
+                    String worldName = loc.getWorld().getName();
+                    OreWorldData worldData = customOreManager.getOreWorldData().get(worldName);
+                    loc.getBlock().setType(worldData.getMaterialReplaced());
                     numBlocksEdited++;
                     itr.remove();
                 }

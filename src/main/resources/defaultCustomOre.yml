@@ -22,6 +22,7 @@ Worlds:
     # The chances of it replacing a stone block
     Spawn Chance: 0.1
     Is Generating Ore: true
+    Material Replaced: STONE
 
 
 Ore Locations:

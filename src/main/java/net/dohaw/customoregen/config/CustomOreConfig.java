@@ -55,7 +55,8 @@ public class CustomOreConfig extends Config {
                 int maxYLevel = worldsSection.getInt(worldName + ".Maximum Y Level");
                 double spawnChance = worldsSection.getDouble(worldName + ".Spawn Chance");
                 boolean willGenerateOre = worldsSection.getBoolean(worldName + ".Is Generating Ore");
-                OreWorldData oreWorldData = new OreWorldData(minYLevel, maxYLevel, spawnChance, willGenerateOre);
+                Material materialReplaced = Material.valueOf(worldsSection.getString(worldName + ".Material Replaced", "STONE"));
+                OreWorldData oreWorldData = new OreWorldData(minYLevel, maxYLevel, spawnChance, willGenerateOre, materialReplaced);
                 worldData.put(worldName, oreWorldData);
             }
         }else{
